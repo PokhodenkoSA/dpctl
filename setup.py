@@ -80,7 +80,7 @@ def getpyexts():
     eca = get_sdl_cflags()
     ela = get_sdl_ldflags()
     libs = []
-    librarys = []
+    libraries = []
 
     if IS_LIN:
         libs += ['rt', 'DPPLOneapiInterface']
@@ -90,24 +90,28 @@ def getpyexts():
         libs += ['DPPLOneapiInterface', 'sycl']
 
     if IS_LIN:
-        librarys = [dppl_oneapi_interface_lib]
+        libraries = [dppl_oneapi_interface_lib]
     elif IS_WIN:
-        librarys = [dppl_oneapi_interface_lib, sycl_lib]
+        libraries = [dppl_oneapi_interface_lib, sycl_lib]
     elif IS_MAC:
-        librarys = [dppl_oneapi_interface_lib]
+        libraries = [dppl_oneapi_interface_lib]
 
-    exts = cythonize(Extension('dppl._oneapi_interface',
-                               [os.path.abspath('dppl/oneapi_interface.pyx'),],
-                                depends=[dppl_oneapi_interface_include,],
-                                include_dirs=[np.get_include(),
-                                              dppl_oneapi_interface_include],
-                                extra_compile_args=eca + get_other_cxxflags(),
-                                extra_link_args=ela,
-                                libraries=libs,
-                                library_dirs=librarys,
-                                runtime_library_dirs=[os.path.abspath('dppl')],
-                                language='c++'))
-    return exts
+    extension = cythonize(Extension(
+        'dppl._oneapi_interface',
+        [os.path.abspath('dppl/oneapi_interface.pyx'),],
+        depends=[dppl_oneapi_interface_include,],
+        include_dirs=[
+            np.get_include(),
+            dppl_oneapi_interface_include
+        ],
+        extra_compile_args=eca + get_other_cxxflags(),
+        extra_link_args=ela,
+        libraries=libs,
+        library_dirs=libraries,
+        runtime_library_dirs=[os.path.abspath('dppl')],
+        language='c++'
+    ))
+    return extension
 
 setup(
     name='pydppl',
@@ -121,7 +125,7 @@ setup(
     ext_modules = getpyexts(),
     setup_requires=requirements,
     cffi_modules=[
-       "./dppl/driverapi.py:ffi"
+        "./dppl/driverapi.py:ffi"
     ],
     install_requires=requirements,
     keywords='dppl',
