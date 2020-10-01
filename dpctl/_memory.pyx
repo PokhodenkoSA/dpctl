@@ -167,7 +167,9 @@ cdef class Memory:
             if PyObject_CheckBuffer(obj) == 0:
                 raise ValueError("The obj does not support the buffer interface.")
 
-            assert(PyObject_GetBuffer(obj, &view, 0) == 0)
+            if PyObject_GetBuffer(obj, &view, 0):
+                raise ValueError("Can not get buffer from {}".format(obj))
+
             # TODO: check buffer different logical structures
             self.queue.memcpy_(self.memory_ptr, view.buf, count)
             PyBuffer_Release(&view)
