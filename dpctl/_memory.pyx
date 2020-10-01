@@ -135,19 +135,14 @@ cdef class Memory:
     cpdef copyfrom(self, object obj, Py_ssize_t count):
         cdef Py_buffer view
 
-        # USM memory should be copied via
         if isinstance(obj, Memory):
-            # for the same context use queue::memcpy
-            # for different contexts depends on dest memory kind
-            #   for host/shared use obj queue
-            #   for device use depends on obj memory kind
-            #     for device use intermediate memory
-            #     for host/shared use dest queue
+            # USM-to-USM copy same context: use internal queue
 
-            # dest    src     method
-            # device  host    dest queue
-            # host    devide  src queue
+            # USM-to-USM copy differnet contexts:
+            # [dest]  [src]   [method]
             # device  device  intermediate memory
+            # device  host    dest queue
+            # host    any     src queue
 
             # TODO: prefetch shared memory from device to host
 
