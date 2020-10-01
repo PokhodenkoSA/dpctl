@@ -33,6 +33,7 @@ from dpctl.backend cimport *
 from ._sycl_core cimport SyclContext, SyclQueue
 
 from cpython cimport Py_buffer
+from cpython.buffer cimport *
 
 
 cdef class Memory:
@@ -130,6 +131,51 @@ cdef class Memory:
             raise ValueError("syclobj keyword can be either None, "
                              "or an instance of SyclConext or SyclQueue")
         return kind.decode('UTF-8')
+
+    cpdef copyfrom(self, object obj, Py_ssize_t count):
+        cdef Py_buffer view
+
+        # USM memory should be copied via
+        if isinstance(obj, Memory):
+            # for the same context use queue::memcpy
+            # for different contexts depends on dest memory kind
+            #   for host/shared use obj queue
+            #   for device use depends on obj memory kind
+            #     for device use intermediate memory
+            #     for host/shared use dest queue
+
+            # dest    src     method
+            # device  host    dest queue
+            # host    devide  src queue
+            # device  device  intermediate memory
+
+            # TODO: prefetch shared memory from device to host
+
+            # for the same context we can use a queue from any of both objects
+            if self._context == obj._context:
+                self.queue.memcpy(self, obj, count)
+
+            else:
+                # for different contexts for device-to-device use intermediate host memory
+                if self._usm_type() == "device" and obj._usm_type() == "device":
+                    raise NotImplementedError("Copy from USM memory object is not implemented.")
+
+                # use queue from device USM
+                elif self._usm_type() == "device":
+                    self.queue.memcpy(self, obj, count)
+                else:
+                    obj.queue.memcpy(self, obj, count)
+
+        else:
+            # for other types of memory just copy it to USM using Buffer Protocol
+
+            if PyObject_CheckBuffer(obj) == 0:
+                raise ValueError("The obj does not support the buffer interface.")
+
+            assert(PyObject_GetBuffer(obj, &view, 0) == 0)
+            # TODO: check buffer different logical structures
+            self.queue.memcpy_(self.memory_ptr, view.buf, count)
+            PyBuffer_Release(&view)
 
 
 cdef class MemoryUSMShared(Memory):

@@ -64,3 +64,4 @@ cdef class SyclQueue:
     cpdef SyclDevice get_sycl_device (self)
     cdef DPPLSyclQueueRef get_queue_ref (self)
     cpdef memcpy (self, dest, src, int count)
+    cdef memcpy_ (self, void *dest, void *src, int count)

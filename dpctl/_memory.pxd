@@ -33,6 +33,8 @@ cdef class Memory:
     cdef _cinit(self, Py_ssize_t nbytes, ptr_type, SyclQueue queue)
     cdef _getbuffer(self, Py_buffer *buffer, int flags)
 
+    cpdef copyfrom(self, object obj, Py_ssize_t count)
+
 
 cdef class MemoryUSMShared(Memory):
     pass

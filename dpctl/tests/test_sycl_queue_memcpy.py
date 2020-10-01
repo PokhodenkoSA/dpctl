@@ -65,6 +65,18 @@ class TestQueueMemcpy (unittest.TestCase):
         self.assertEqual(type(cm.exception), TypeError)
         self.assertEqual(str(cm.exception), "Parameter src should be Memory.")
 
+    def test_memcpy_device_loop (self):
+        q = dpctl.get_current_queue()
+        nbytes = 1024
+        m_host1 = dpctl._memory.MemoryUSMShared(nbytes, q)
+        m_device = dpctl._memory.MemoryUSMShared(nbytes, q)
+        m_host2 = dpctl._memory.MemoryUSMShared(nbytes, q)
+
+        memoryview(m_host1)[:5] = b"hello"
+        q.memcpy(m_device, m_host1, nbytes)
+        q.memcpy(m_host2, m_device, nbytes)
+
+        self.assertEqual(memoryview(m_host2)[:5], b'hello')
 
 if __name__ == '__main__':
     unittest.main()

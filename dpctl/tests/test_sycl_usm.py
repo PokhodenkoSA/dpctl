@@ -103,14 +103,45 @@ class TestMemoryUSMBase:
         self.assertEqual(m._usm_type(), self.usm_type)
 
 
-class TestMemoryUSMShared(TestMemoryUSMBase, unittest.TestCase):
+class TestMemoryUSMHostShared(TestMemoryUSMBase):
+
+    def test_copyfrom(self):
+        m = self.MemoryUSMClass(1024)
+
+        with self.assertRaises(ValueError) as cm:
+            m.copyfrom(None, 1024)
+
+        self.assertEqual(type(cm.exception), ValueError)
+        self.assertEqual(str(cm.exception),
+                         "The obj does not support the buffer interface.")
+
+        src = memoryview(b'hello')
+
+        m.copyfrom(src, len(src))
+
+        self.assertEqual(memoryview(m)[:5].tolist(), src[:5].tolist())
+
+
+    def test_copyfrom_usm(self):
+        m = self.MemoryUSMClass(1024)
+        src = MemoryUSMShared(1024)
+
+        memoryview(src)[:5] = b'hello'
+
+        m.copyfrom(src, 1024)
+
+        self.assertEqual(memoryview(m)[:5].tolist(), memoryview(src)[:5].tolist())
+
+
+
+class TestMemoryUSMShared(TestMemoryUSMHostShared, unittest.TestCase):
     """ Tests for MemoryUSMShared """
 
     MemoryUSMClass = MemoryUSMShared
     usm_type = 'shared'
 
 
-class TestMemoryUSMHost(TestMemoryUSMBase, unittest.TestCase):
+class TestMemoryUSMHost(TestMemoryUSMHostShared, unittest.TestCase):
     """ Tests for MemoryUSMHost """
 
     MemoryUSMClass = MemoryUSMHost

@@ -62,6 +62,9 @@ cdef class SyclContext:
     cdef DPPLSyclContextRef get_context_ref (self):
         return self.ctxt_ptr
 
+    def __eq__(self, SyclContext other):
+        assert(isinstance(other, SyclContext))
+        return DPPLContext_Equal(self.ctxt_ptr, other.ctxt_ptr)
 
 cdef class SyclDevice:
     ''' Wrapper class for a Sycl Device
@@ -137,6 +140,8 @@ cdef class SyclQueue:
         cdef void *c_dest
         cdef void *c_src
 
+        # TODO: check that contexts are the same.
+
         if isinstance(dest, Memory):
             c_dest = <void*>(<Memory>dest).memory_ptr
         else:
@@ -148,6 +153,9 @@ cdef class SyclQueue:
             raise TypeError("Parameter src should be Memory.")
 
         DPPLQueue_Memcpy(self.queue_ptr, c_dest, c_src, count)
+
+    cdef memcpy_ (self, void *dest, void *src, int count):
+        DPPLQueue_Memcpy(self.queue_ptr, dest, src, count)
 
 
 cdef class _SyclQueueManager:

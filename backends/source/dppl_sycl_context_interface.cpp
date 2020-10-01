@@ -56,3 +56,11 @@ void DPPLContext_Delete (__dppl_take DPPLSyclContextRef CtxRef)
 {
     delete unwrap(CtxRef);
 }
+
+bool DPPLContext_Equal(__dppl_keep const DPPLSyclContextRef LCRef,
+                       __dppl_keep const DPPLSyclContextRef RCRef)
+{
+    auto LC = unwrap(LCRef);
+    auto RC = unwrap(RCRef);
+    return *LC == *RC;
+}

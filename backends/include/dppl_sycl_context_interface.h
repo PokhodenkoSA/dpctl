@@ -51,4 +51,15 @@ bool DPPLContext_IsHost (__dppl_keep const DPPLSyclContextRef CtxRef);
 DPPL_API
 void DPPLContext_Delete (__dppl_take DPPLSyclContextRef CtxRef);
 
+
+/*!
+ * @brief Check that contexts are equel.
+ *
+ * @param    LCRef          The DPPLSyclContextRef pointer.
+ * @param    RCRef          The DPPLSyclContextRef pointer.
+ */
+DPPL_API
+bool DPPLContext_Equal(__dppl_keep const DPPLSyclContextRef LCRef,
+                       __dppl_keep const DPPLSyclContextRef RCRef);
+
 DPPL_C_EXTERN_C_END

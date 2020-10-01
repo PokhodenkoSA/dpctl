@@ -48,6 +48,8 @@ cdef extern from "dppl_sycl_types.h":
 
 cdef extern from "dppl_sycl_context_interface.h":
     cdef void DPPLContext_Delete (DPPLSyclContextRef CtxtRef) except +
+    cdef bool DPPLContext_Equal (DPPLSyclContextRef LCRef,
+                                 DPPLSyclContextRef RCRef) except +
 
 
 cdef extern from "dppl_sycl_device_interface.h":
