@@ -1,5 +1,12 @@
 name: base
 channels:
+  - intel
   - defaults
 dependencies:
-  - conda-build
+  - cython
+  - cmake
+  - python=3.7
+  - numpy=1.19
+  - dpcpp_cpp_rt
+  - pytest
+  - pytest-cov

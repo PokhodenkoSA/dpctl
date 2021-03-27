@@ -44,6 +44,8 @@ jobs:
         shell: bash
     steps:
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
     - name: cache install
       id: cache-install
       uses: actions/cache@v2
@@ -55,8 +57,19 @@ jobs:
     - name: install
       if: steps.cache-install.outputs.cache-hit != 'true'
       run: scripts/install_linux.sh $LINUX_BASEKIT_URL $LINUX_DPCPP_COMPONENTS_WEB
+
+    - name: Add conda to system path
+      run: |
+        # $CONDA is an environment variable pointing to the root of the miniconda directory
+        echo $CONDA/bin >> $GITHUB_PATH
+    - name: Install conda dependencies
+      run: |
+        conda info
+        conda env update --file environment.yml --name base
+
     - name: build
-      run: scripts/build_linux.sh dpc++
+      run: scripts/build_linux.sh
+
     - name: exclude unused files from cache
       if: steps.cache-install.outputs.cache-hit != 'true'
       run: scripts/cache_exclude_linux.sh
